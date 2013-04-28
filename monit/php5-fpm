@@ -1,0 +1,7 @@
+check process php5-fpm with pidfile /var/run/php5-fpm.pid
+  group www-data
+  start program = "/etc/init.d/php5-fpm start"
+  stop program  = "/etc/init.d/php5-fpm stop"
+  # add unixsocket monitoring below for each php-fpm pool
+  ### INSERTHERE ### DO NOT REMOVE THIS LINE ###
+  if 5 restarts within 5 cycles then timeout

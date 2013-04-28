@@ -1,0 +1,192 @@
+#!/bin/bash
+
+user=`whoami`
+
+if [ -z "$1" ];then
+  echo "Usage: site-create <hostname> (no www)"
+  exit 1
+fi
+
+# make sure the user's home directory exists, else exit
+if [ ! -d "/home/$user" ]; then
+  echo "Error: Home directory for user $user was not found."
+  exit 1
+fi
+
+# make sure the site doesn't already exist
+if [ -d "/home/$user/sites/$1" ]; then
+  echo "Error: The site /home/$user/sites/$1 already exists."
+  exit 1
+fi
+
+echo "Creating site..."
+
+# create the sites dir if it doesn't exist
+if [ ! -d "/home/$user/sites" ]; then
+  mkdir "/home/$user/sites"
+  echo "Created the sites directory."
+fi
+
+# create the site directory and set owner
+mkdir "/home/$user/sites/$1"
+echo "Created the $1 directory."
+
+
+# create the nginx site configuration
+if [ $1 = "default" ]
+then
+sudo bash -c "cat > /etc/nginx/sites-available/$1" <<END
+server {
+  server_name _;
+  root /home/$user/sites/$1/public;
+
+  access_log  /var/log/nginx/$1-access.log;
+  error_log  /var/log/nginx/$1-error.log;
+
+  include /etc/nginx/includes/location.conf;
+
+  location / {
+    try_files \$uri \$uri/ /index.php?\$args;
+  }
+
+  # pass all .php files to php-fpm
+  location ~ \.php$ {
+    try_files \$uri =404;
+    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    fastcgi_param  PHP_VALUE  "open_basedir=\$document_root:/var/log/php/:/var/lib/php/";
+    include fastcgi_params;
+    fastcgi_index index.php;
+    fastcgi_pass unix:/var/run/php5-fpm-$1.sock;
+  }
+
+}
+END
+mkdir "/home/$user/sites/$1/public"
+echo "<html><head><title>Welcome</title></head><body>NGINX</body></html>" > "/home/$user/sites/$1/public/index.html"
+else
+sudo bash -c "cat > /etc/nginx/sites-available/$1" <<END
+# redirect www to non-www
+server {
+  server_name www.$1;
+  return 301 $scheme://$1$request_uri;
+}
+
+server {
+  server_name $1;
+  root /home/$user/sites/$1/public;
+
+  access_log  /var/log/nginx/$1-access.log;
+  error_log  /var/log/nginx/$1-error.log;
+
+  include /etc/nginx/includes/location.conf;
+
+  location / {
+    try_files \$uri \$uri/ /index.php?\$args;
+    #try_files \$uri \$uri/ /index.php?q=$uri&\$args; #wordpress
+  }
+
+  # pass all .php files to php-fpm
+  location ~ \.php$ {
+    try_files \$uri =404;
+    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    fastcgi_param  PHP_VALUE  "open_basedir=\$document_root:/var/log/php/:/var/lib/php/:/home/$user/sites/$1/app/storage/";
+    include fastcgi_params;
+    fastcgi_index index.php;
+    fastcgi_pass unix:/var/run/php5-fpm-$1.sock;
+  }
+
+}
+END
+fi
+echo "Created the nginx site config."
+
+# enable the new site
+sudo ln -s /etc/nginx/sites-available/$1 /etc/nginx/sites-enabled/$1
+echo "Enabled the nginx site config."
+
+# create the slowlog dir if it doesn't exist
+if [ ! -d "/var/log/php-fpm" ]; then
+  sudo mkdir "/var/log/php-fpm"
+fi
+
+# create the php-fpm pool configuration
+sudo bash -c "cat > /etc/php5/fpm/pool.d/$1.conf" <<END
+[$1]
+
+user = $user
+group = $user
+
+request_slowlog_timeout = 5s
+slowlog = /var/log/php-fpm/slowlog-$1.log
+
+listen = /var/run/php5-fpm-$1.sock
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0666
+listen.backlog = -1
+
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+pm.max_requests = 500
+
+request_terminate_timeout = 120s
+rlimit_files = 131072
+rlimit_core = unlimited
+catch_workers_output = yes
+
+env[HOSTNAME] = \$HOSTNAME
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+END
+echo "Created the php-fpm pool."
+
+if [ -f /etc/monit/conf.d/php5-fpm ]; then
+  # add an entry to the monit configuration for php-fpm
+  sudo sed -ri "s/(\s*### INSERTHERE.+)/\1\n  if failed unixsocket \/var\/run\/php5-fpm-$1.sock then restart/" /etc/monit/conf.d/php5-fpm
+fi
+
+# ask user about creating git repo
+read -rep $'Would you like to create a git repo for this site? [y]\n' -n 1
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+
+  # create the repos dir if it doesn't exist
+  if [ ! -d "/home/$user/repos" ]; then
+    mkdir "/home/$user/repos"
+    echo "Created the repos directory."
+  fi
+
+  # create a git repo for the site
+  mkdir "/home/$user/repos/$1.git"
+  cd "/home/$user/repos/$1.git"
+  git init --bare
+  chown -R $user:$user "/home/$user/sites/$1"
+  echo "Created the git repo for $1."
+
+  # create the post-receive hook for automatic updates
+  sudo bash -c "cat > /home/$user/repos/$1.git/hooks/post-receive" <<END
+#!/bin/sh
+GIT_WORK_TREE=/home/$user/sites/$1/
+export GIT_WORK_TREE
+git checkout -f
+END
+  sudo chmod +x "/home/$user/repos/$1.git/hooks/post-receive"
+  echo "Created the post-receive hook."
+
+  echo "Finished git repository creation for site $1."
+  echo "Use: git remote add web ssh://$user@$1:22/home/$user/repos/$1.git"
+  echo "and: git push web +master:refs/heads/master"
+
+fi
+
+# restart services
+sudo service nginx reload
+sudo service php5-fpm reload
+sudo service monit reload
+
+echo "Site setup is complete."
+exit

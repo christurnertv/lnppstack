@@ -1,0 +1,15 @@
+#!/bin/bash
+
+read -rep $'This script will install phpsecinfo to: `pwd`/phpsecinfo. Are you sure you want to continue? [y]\n' -n 1
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 1
+fi
+
+wget http://phpsec.org/projects/phpsecinfo/phpsecinfo.zip
+unzip phpsecinfo.zip
+mv phpsecinfo-* phpsecinfo
+rm -f phpsecinfo.zip
+
+echo "PhpSecInfo has been installed to: `pwd`/phpsecinfo."
+exit

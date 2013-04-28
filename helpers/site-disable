@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if [ -z "$1" ];then
+  echo "Usage: site-disable <hostname> (no www)"
+  exit 1
+fi
+
+# make sure the site directory exists
+if [ ! -d "/home/$user/sites/$1" ]; then
+  echo "The site: /home/$user/sites/$1 does not exist."
+  exit 1
+fi
+
+# disable the nginx site conifg
+sudo rm -f /etc/nginx/sites-enabled/$1
+
+# disable the php-fpm pool
+sudo mv /etc/php5/fpm/pool.d/$1.conf /etc/php5/fpm/pool.d/$1.disabled
+
+if [ -f /etc/monit/conf.d/php5-fpm ]; then
+  # delete the entry to the monit configuration for php-fpm
+  sudo sed -i "/$1\.sock/d" /etc/monit/conf.d/php5-fpm
+fi
+
+# restart services
+sudo service nginx reload
+sudo service php5-fpm reload
+sudo service monit reload
+
+echo "The site: $1 has been disabled."
+exit

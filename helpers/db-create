@@ -1,0 +1,17 @@
+#!/bin/bash
+
+EXPECTED_ARGS=3
+
+if [ $# -ne $EXPECTED_ARGS ]; then
+  echo "Usage: db-create <dbname> <username> <password>"
+  exit 1
+fi
+
+# create the postgres user
+echo "CREATE ROLE $2 WITH LOGIN ENCRYPTED PASSWORD '$3';" | sudo -i -u postgres psql
+
+# create the postgres db, setting the owner
+sudo -i -u postgres createdb --owner=$2 $1
+
+echo "Done."
+exit

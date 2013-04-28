@@ -1,0 +1,23 @@
+# set polling interval
+set daemon 120
+  with start delay 240
+
+# default log file
+set logfile /var/log/monit.log
+
+# event queue config in case mail server is down
+set eventqueue
+  basedir /var/monit
+  slots 100
+
+# mail server config
+set mailserver localhost
+
+# mail format config
+set mail-format { from: monit@$HOSTNAME }
+
+# default alert email address
+set alert $ADMINEMAIL
+
+# additional config files to load
+include /etc/monit/conf.d/*
