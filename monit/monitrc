@@ -17,7 +17,7 @@ set mailserver localhost
 set mail-format { from: monit@$HOSTNAME }
 
 # default alert email address
-set alert $ADMINEMAIL
+set alert $ADMINEMAIL NOT ON { action, instance, pid, ppid }
 
 # additional config files to load
 include /etc/monit/conf.d/*
