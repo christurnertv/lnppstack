@@ -92,12 +92,11 @@ usermod -a -G adm $USERNAME
 echo "postfix postfix/main_mailer_type select Internet Site" | debconf-set-selections
 echo "postfix postfix/mailname string localhost" | debconf-set-selections
 echo "postfix postfix/destinations string localhost.localdomain, localhost" | debconf-set-selections
-aptitude -y install postfix mailutils
+aptitude -y install postfix
 /usr/sbin/postconf -e "inet_interfaces = loopback-only"
 
 # configure root alias
 echo "root: $ADMINEMAIL" >> /etc/aliases
-echo "$USERNAME: root" >> /etc/aliases
 
 touch /tmp/restart-postfix
 
@@ -284,3 +283,5 @@ for service_name in $(ls /tmp/ | grep restart-* | cut -d- -f2-10); do
   service $service_name restart
   rm -f /tmp/restart-$service_name
 done
+
+reboot
