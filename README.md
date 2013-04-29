@@ -27,6 +27,9 @@ Helper scripts get installed to /usr/local/bin.
 # create a site
 site-create example.com
 
+# install phpsecinfo in current directory
+site-install-phpsecinfo
+
 # delete a site
 site-delete example.com
 

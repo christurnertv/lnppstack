@@ -144,10 +144,18 @@ env[TEMP] = /tmp
 END
 echo "Created the php-fpm pool."
 
-if [ -f /etc/monit/conf.d/php5-fpm ]; then
-  # add an entry to the monit configuration for php-fpm
-  sudo sed -ri "s/(\s*### INSERTHERE.+)/\1\n  if failed unixsocket \/var\/run\/php5-fpm-$1.sock then restart/" /etc/monit/conf.d/php5-fpm
+# create the monit configuration for nginx if it doesn't already exist
+if [ ! -f /etc/monit/conf.d/nginx ]; then
+  sudo wget https://raw.github.com/gizmovation/lnppscripts/master/monit/nginx -O /etc/monit/conf.d/nginx
 fi
+
+# create the monit configuration for php if it doesn't already exist
+if [ ! -f /etc/monit/conf.d/php5-fpm ]; then
+  sudo wget https://raw.github.com/gizmovation/lnppscripts/master/monit/php5-fpm -O /etc/monit/conf.d/php5-fpm
+fi
+
+# add an entry to the monit configuration for php-fpm
+sudo sed -ri "s/(\s*### INSERTHERE.+)/\1\n  if failed unixsocket \/var\/run\/php5-fpm-$1.sock then restart/" /etc/monit/conf.d/php5-fpm
 
 # ask user about creating git repo
 read -rep $'Would you like to create a git repo for this site? [y]\n' -n 1
@@ -185,8 +193,7 @@ fi
 
 # restart services
 sudo service nginx reload
-sudo service php5-fpm reload
+sudo service php5-fpm restart
 sudo service monit reload
 
 echo "Site setup is complete."
-exit

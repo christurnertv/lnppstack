@@ -284,18 +284,3 @@ for service_name in $(ls /tmp/ | grep restart-* | cut -d- -f2-10); do
   service $service_name restart
   rm -f /tmp/restart-$service_name
 done
-
-###############################################################################
-### create default site (at least one site must exist or monit will timeout)
-###############################################################################
-
-# create site as user
-echo n|sudo -u $USERNAME site-create default
-
-###############################################################################
-### all done
-###############################################################################
-
-mail -s "Linode $HOSTNAME setup complete" root <<EOT
-Stackscript has run and setup is complete. Server is rebooting and will be available soon. You will need to login and use the site-create script to add the default nginx site for monit to work properly.
-EOT
