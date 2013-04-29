@@ -1,5 +1,34 @@
 #!/bin/bash
 
+# LNPP Stack: Installs and configures nginx, php5-fpm, and postgres.
+# Tested on Ubuntu 12.10 64bit.
+
+# Site Helper Scripts
+# -----------------------------------------------------------------------------
+# A great feature of this script are the site helpers that get installed into
+# /usr/local/bin. They make it easy to create and manage nginx/php sites. They 
+# take care of nginx config, php-fpm config, and even monit config. The 
+# site-create script supports automatic git repository creation along with the 
+# hooks for deploy-on-push site management.
+
+# Basic Config and System Security
+# -----------------------------------------------------------------------------
+# - Securing PHP. PHP.ini has been modified per security guidelines.
+# - site-install-phpsecinfo script is provide for testing configuration.
+# - Securing SSH. Root login and password auth are disabled.
+# - Fail2Ban is set up to protect SSH.
+# - Firewall is set to block everything but SSH, HTTP, and HTTPS.
+# - Monit is installed and configured to monitor important services.
+
+# Warranty and License
+# -----------------------------------------------------------------------------
+# No warranty, use at your own risk!
+# Released under MIT license.
+
+# See Github for more info and to contribute!
+# -----------------------------------------------------------------------------
+# https://github.com/gizmovation/lnppstack
+
 #<udf name="USERNAME" label="User to Create">
 #<udf name="PASSWORD" label="User Password">
 #<udf name="HOSTNAME" label="Hostname">
