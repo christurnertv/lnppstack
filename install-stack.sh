@@ -283,5 +283,3 @@ for service_name in $(ls /tmp/ | grep restart-* | cut -d- -f2-10); do
   service $service_name restart
   rm -f /tmp/restart-$service_name
 done
-
-reboot
