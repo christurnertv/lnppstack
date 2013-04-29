@@ -27,6 +27,6 @@ fi
 # restart services
 sudo service nginx reload
 sudo service php5-fpm restart
-sudo service monit reload
+sudo service monit restart
 
 echo "The site: $1 has been enabled."

@@ -92,7 +92,7 @@ usermod -a -G adm $USERNAME
 echo "postfix postfix/main_mailer_type select Internet Site" | debconf-set-selections
 echo "postfix postfix/mailname string localhost" | debconf-set-selections
 echo "postfix postfix/destinations string localhost.localdomain, localhost" | debconf-set-selections
-aptitude -y install postfix
+aptitude -y install postfix mailutils
 /usr/sbin/postconf -e "inet_interfaces = loopback-only"
 
 # configure root alias
@@ -136,6 +136,10 @@ sed -i "s/^action = %(action_)s/action = %(action_mwl)s/" /etc/fail2ban/jail.loc
 sed -ri "/^\[ssh-ddos\]$/,/^\[/s/port[[:blank:]]*=.*/port = $SSHPORT/" /etc/fail2ban/jail.local
 sed -ri "/^\[ssh-ddos\]$/,/^\[/s/enabled[[:blank:]]*=.*/enabled = true/" /etc/fail2ban/jail.local
 sed -ri "/^\[ssh\]$/,/^\[/s/port[[:blank:]]*=.*/port = $SSHPORT/" /etc/fail2ban/jail.local
+
+# disable email notification for start/stop events
+sed -i '/^actionstart/,+7 s.^.#.' /etc/fail2ban/action.d/sendmail*
+sed -i '/^actionstop/,+7 s.^.#.' /etc/fail2ban/action.d/sendmail*
 
 touch /tmp/restart-fail2ban
 
@@ -234,8 +238,6 @@ cp /tmp/lnppstack/monit/sshd /etc/monit/conf.d/sshd
 sed -i "s/\$SSHPORT/$SSHPORT/g" /etc/monit/conf.d/sshd
 
 cp /tmp/lnppstack/monit/postfix /etc/monit/conf.d/postfix
-cp /tmp/lnppstack/monit/php5-fpm /etc/monit/conf.d/php5-fpm
-cp /tmp/lnppstack/monit/nginx /etc/monit/conf.d/nginx
 cp /tmp/lnppstack/monit/postgresql /etc/monit/conf.d/postgresql
 
 touch /tmp/restart-monit
@@ -283,3 +285,14 @@ for service_name in $(ls /tmp/ | grep restart-* | cut -d- -f2-10); do
   service $service_name restart
   rm -f /tmp/restart-$service_name
 done
+
+mail -s "LNPP Stack install for $HOSTNAME" $ADMINEMAIL <<EOT
+LNPP Stack installation complete. Your server will need to be rebooted. You can login via ssh using your RSA key. Root login and password authentication for ssh have been disabled.
+
+Once you login, you can start creating and managing sites using the helper scripts available in /usr/local/bin.
+
+For more info, please visit: https://github.com/gizmovation/lnppstack
+
+Enjoy!
+EOT
+
