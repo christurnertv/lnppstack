@@ -40,7 +40,7 @@ site-disable example.com
 site-enable example.com
 
 # update helper scripts
-lnpp-helpers update
+sudo lnpp-helpers update
 ```
 
 ## Warranty

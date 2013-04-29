@@ -28,7 +28,7 @@ if [ "$1" = "update" ]; then
 	sudo wget -N https://raw.github.com/gizmovation/lnppstack/master/helpers/site-install-phpsecinfo -O /usr/local/bin/site-install-phpsecinfo
 	chmod 755 /usr/local/bin/site-install-phpsecinfo
 
-	sudo wget -N https://raw.github.com/gizmovation/lnppstack/master/helpers/lnpp-helpers-update -O /usr/local/bin/lnpp-helpers
+	sudo wget -N https://raw.github.com/gizmovation/lnppstack/master/helpers/lnpp-helpers -O /usr/local/bin/lnpp-helpers
 	chmod 755 /usr/local/bin/lnpp-helpers
 
 	echo "Done."
