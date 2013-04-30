@@ -1,4 +1,4 @@
-# LNPP Scripts
+# LNPP Stack Scripts
 
 Scripts to simplify installing, configuring, and maintaining nginx, php-fpm, and postgres on ubuntu.
 Tested on ubuntu 12.10.

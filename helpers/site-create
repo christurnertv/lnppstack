@@ -146,12 +146,12 @@ echo "Created the php-fpm pool."
 
 # create the monit configuration for nginx if it doesn't already exist
 if [ ! -f /etc/monit/conf.d/nginx ]; then
-  sudo wget https://raw.github.com/gizmovation/lnppscripts/master/monit/nginx -O /etc/monit/conf.d/nginx
+  sudo wget https://raw.github.com/gizmovation/lnppstack/master/monit/nginx -O /etc/monit/conf.d/nginx
 fi
 
 # create the monit configuration for php if it doesn't already exist
 if [ ! -f /etc/monit/conf.d/php5-fpm ]; then
-  sudo wget https://raw.github.com/gizmovation/lnppscripts/master/monit/php5-fpm -O /etc/monit/conf.d/php5-fpm
+  sudo wget https://raw.github.com/gizmovation/lnppstack/master/monit/php5-fpm -O /etc/monit/conf.d/php5-fpm
 fi
 
 # add an entry to the monit configuration for php-fpm
