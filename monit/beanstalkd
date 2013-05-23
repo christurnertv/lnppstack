@@ -1,0 +1,7 @@
+check process beanstalkd with pidfile /var/run/beanstalkd.pid
+ start "/etc/init.d/beanstalkd start"
+ stop "/etc/init.d/beanstalkd stop"
+ if failed port 11300
+   send "stats\r\n"
+   expect "OK [0-9]{1,}\r\n"
+ then alert

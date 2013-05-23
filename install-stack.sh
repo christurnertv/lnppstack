@@ -192,14 +192,14 @@ chown -R www-data /var/lib/php/
 
 # modify php ini settings
 phpini=/etc/php5/fpm/php.ini
-sed -i 's/^disable_functions =/disable_functions = php_uname, getmyuid, getmypid, passthru, leak, listen, diskfreespace, tmpfile, link, ignore_user_abord, shell_exec, dl, set_time_limit, exec, system, highlight_file, source, show_source, fpaththru, virtual, posix_ctermid, posix_getcwd, posix_getegid, posix_geteuid, posix_getgid, posix_getgrgid, posix_getgrnam, posix_getgroups, posix_getlogin, posix_getpgid, posix_getpgrp, posix_getpid, posix, _getppid, posix_getpwnam, posix_getpwuid, posix_getrlimit, posix_getsid, posix_getuid, posix_isatty, posix_kill, posix_mkfifo, posix_setegid, posix_seteuid, posix_setgid, posix_setpgid, posix_setsid, posix_setuid, posix_times, posix_ttyname, posix_uname, proc_open, proc_close, proc_get_status, proc_nice, proc_terminate, phpinfo/' $phpini
+sed -i 's/^disable_functions =/disable_functions = php_uname, passthru, leak, listen, diskfreespace, tmpfile, link, ignore_user_abord, shell_exec, dl, set_time_limit, exec, system, highlight_file, source, show_source, fpaththru, virtual, posix_ctermid, posix_getcwd, posix_getegid, posix_geteuid, posix_getgid, posix_getgrgid, posix_getgrnam, posix_getgroups, posix_getlogin, posix_getpgid, posix_getpgrp, posix_getpid, posix, _getppid, posix_getpwnam, posix_getpwuid, posix_getrlimit, posix_getsid, posix_getuid, posix_isatty, posix_kill, posix_mkfifo, posix_setegid, posix_seteuid, posix_setgid, posix_setpgid, posix_setsid, posix_setuid, posix_times, posix_ttyname, posix_uname, proc_open, proc_close, proc_get_status, proc_nice, proc_terminate, phpinfo/' $phpini
 sed -i 's/^display_errors = On/display_errors = Off/' $phpini
 sed -i 's/^session.cookie_httponly =/session.cookie_httponly = 1/' $phpini
 sed -i 's/^file_uploads = On/file_uploads = Off/' $phpini
 sed -i 's/^upload_max_filesize =.*/upload_max_filesize = 2MB/' $phpini
 sed -i 's/^post_max_size =.*/post_max_size = 20K/' $phpini
 sed -i 's/^max_execution_time =.*/max_execution_time = 30/' $phpini
-sed -i 's/^memory_limit = 128M/memory_limit = 8M/' $phpini
+sed -i 's/^memory_limit = 128M/memory_limit = 12M/' $phpini
 sed -i 's/^register_globals = On/register_globals = Off/' $phpini
 sed -i 's/^allow_url_fopen = On/allow_url_fopen = Off/' $phpini
 sed -i 's/^allow_url_include = On/allow_url_include = Off/' $phpini
@@ -216,6 +216,16 @@ curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
 
 touch /tmp/restart-php5-fpm
+
+###############################################################################
+### install and configure beanstalkd queue
+###############################################################################
+
+aptitude -y install beanstalkd
+
+sed -i "s/#START=yes/START=yes/g" /etc/default/beanstalkd
+
+touch /tmp/restart-beanstalkd
 
 ###############################################################################
 ### install and configure monit
@@ -239,6 +249,7 @@ sed -i "s/\$SSHPORT/$SSHPORT/g" /etc/monit/conf.d/sshd
 
 cp /tmp/lnppstack/monit/postfix /etc/monit/conf.d/postfix
 cp /tmp/lnppstack/monit/postgresql /etc/monit/conf.d/postgresql
+cp /tmp/lnppstack/monit/beanstalkd /etc/monit/conf.d/beanstalkd
 
 touch /tmp/restart-monit
 

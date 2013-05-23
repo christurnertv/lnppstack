@@ -68,7 +68,7 @@ sudo bash -c "cat > /etc/nginx/sites-available/$1" <<END
 # redirect www to non-www
 server {
   server_name www.$1;
-  return 301 $scheme://$1$request_uri;
+  return 301 \$scheme://$1\$request_uri;
 }
 
 server {
@@ -89,7 +89,7 @@ server {
   location ~ \.php$ {
     try_files \$uri =404;
     fastcgi_split_path_info ^(.+\.php)(/.+)$;
-    fastcgi_param  PHP_VALUE  "open_basedir=\$document_root:/var/log/php/:/var/lib/php/:/home/$user/sites/$1/app/storage/";
+    fastcgi_param  PHP_VALUE  "open_basedir=/var/log/php/:/var/lib/php/:/home/$user/sites/$1/";
     include fastcgi_params;
     fastcgi_index index.php;
     fastcgi_pass unix:/var/run/php5-fpm-$1.sock;

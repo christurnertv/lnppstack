@@ -1,0 +1,23 @@
+#!/bin/bash
+
+user=`whoami`
+
+EXPECTED_ARGS=1
+
+if [ $# -ne $EXPECTED_ARGS ]; then
+  echo "Usage: db-backup <dbname>"
+  exit 1
+fi
+
+# create the sites dir if it doesn't exist
+if [ ! -d "/home/$user/backup" ]; then
+  mkdir "/home/$user/backup"
+  echo "Created the backup directory."
+fi
+
+filename="/home/$user/backup/$1_$(date +%Y-%m-%d_%H%M%S).sql"
+
+sudo -u postgres pg_dump "$1" > "$filename"
+
+echo "Backup of $1 saved to: $filename"
+exit
