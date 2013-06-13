@@ -68,7 +68,7 @@ sudo bash -c "cat > /etc/nginx/sites-available/$1" <<END
 # redirect www to non-www
 server {
   server_name www.$1;
-  return 301 \$scheme://$1\$request_uri;
+  return 301 \$scheme://\$server_name\$request_uri;
 }
 
 server {
