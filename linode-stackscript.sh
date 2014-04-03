@@ -42,7 +42,7 @@
 export linode=true
 
 # download the install script from github
-wget https://raw.github.com/gizmovation/lnppstack/master/install-stack.sh -O /tmp/install-stack.sh
+wget https://raw.githubusercontent.com/gizmovation/lnppstack/master/install-stack.sh -O /tmp/install-stack.sh
 chmod +x /tmp/install-stack.sh
 
 # execute the install script

@@ -4,7 +4,7 @@
 ### required inputs specified by linode stackscript or user input
 ###############################################################################
 
-if ! $linode; then
+if [ -z "$linode" ]; then
 
   if [ ! "`whoami`" = "root" ]
   then
@@ -58,8 +58,10 @@ ln -s -f /usr/share/zoneinfo/UTC /etc/localtime
 
 # tweak sysctl settings
 cat >>/etc/sysctl.conf <<EOF
-# Block SYN attacks
+# Hardening TCP/IP Stack Against SYN Floods
 net.ipv4.tcp_syncookies = 1
+#net.ipv4.tcp_max_syn_backlog = 2048
+#net.ipv4.tcp_synack_retries = 3
 EOF
 
 # run system updates
