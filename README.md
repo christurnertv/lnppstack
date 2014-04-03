@@ -14,7 +14,7 @@ You can use these scripts to setup your linode VPS. If you find these scripts us
 To download and use initial install scripts, use the following commands (as root):
 
 ```bash
-wget https://raw.githubusercontent.com/gizmovation/lnppscripts/master/install-stack.sh
+wget https://raw.githubusercontent.com/gizmovation/lnppstack/master/install-stack.sh
 chmod u+x install-stack.sh
 ./install-stack.sh
 ```
